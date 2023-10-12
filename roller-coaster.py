@@ -24,16 +24,11 @@ height = 10
 if not height % 2 == 0:
     raise Exception("height must be even")
 
-"""The height of the roller coaster, each layer is 3 blocks high"""
-layers = 10
-
 """
-The amount of height changes each layer should have
-This should be a number between 0 and 1
-0: The minimum number of height changes
-1: The maximum number of height changes
+The maximum height of the roller coaster, each layer is 3 blocks high
+Note that small roller coasters or small values of the extend_amount can stop a roller coasters reaching their full height
 """
-height_changes = 0
+layers = 3
 
 """
 The amount to extend each layer by
@@ -41,7 +36,7 @@ This should be a number between 0 and 1
 0: no extension
 1: fully extended
 """
-extend_amount = 0
+extend_amount = 1
 
 """
 When set to true, the area taken up by the roller coaster is cleaned up first
@@ -242,9 +237,7 @@ class Level:
     def add_heights_to_path(self, path):
         num_flat = path.count_flat()
 
-        max_height_changes = int(num_flat / 6)
-        min_height_changes = min(1, max_height_changes)
-        num_height_changes = round((max_height_changes - min_height_changes) * height_changes + min_height_changes)
+        num_height_changes = int(num_flat / 12)
 
         num_ascending = num_height_changes * 6
         num_non_ascending = num_flat - num_ascending
@@ -402,7 +395,7 @@ class Level:
         while True:
             if random.uniform(0, 1) > extend_amount:
                 break
-            elif not extend_path_iterated():
+            if not extend_path_iterated():
                 break
 
     def get_upper_layer(self):
