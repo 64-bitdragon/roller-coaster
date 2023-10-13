@@ -18,11 +18,11 @@ x = 0
 y = -60
 z = 0
 
-"""Width and Height of the roller coaster"""
+"""Width and depth of the roller coaster"""
 width = 10
-height = 10
-if not height % 2 == 0:
-    raise Exception("height must be even")
+depth = 10
+if not depth % 2 == 0:
+    raise Exception("depth must be even")
 
 """
 The maximum height of the roller coaster, each layer is 3 blocks high
@@ -84,6 +84,7 @@ class Square:
         copy.south = self.south
         copy.height = self.height
         copy.type = self.type
+        copy.gradient = self.gradient
         return copy
 
     def get_track_name(self):
@@ -115,9 +116,9 @@ class Square:
 
 class Level:
     def __init__(self):
-        self.grid = np.zeros((width, height), Square)
+        self.grid = np.zeros((width, depth), Square)
         for i in range(width):
-            for j in range(height):
+            for j in range(depth):
                 self.grid[i, j] = Square()
 
     def create_default_circuit(self):
@@ -159,13 +160,13 @@ class Level:
 
         while True:
             right()
-            if p[1] == height - 1:
+            if p[1] == depth - 1:
                 break
 
             up_one()
             left()
 
-            if p[1] == height - 1:
+            if p[1] == depth - 1:
                 break
 
             up_one()
@@ -174,7 +175,7 @@ class Level:
         down()
 
     def add_random_permutation(self):
-        indices = [x for x in np.ndindex((width - 1, height - 1))]
+        indices = [x for x in np.ndindex((width - 1, depth - 1))]
         random.shuffle(indices)
 
         rotated_index = None
@@ -188,7 +189,7 @@ class Level:
 
         orphan_path = Path(self, rotated_index[0], rotated_index[1])
 
-        indices = [x for x in np.ndindex((width - 1, height - 1))]
+        indices = [x for x in np.ndindex((width - 1, depth - 1))]
         random.shuffle(indices)
 
         for index in indices:
@@ -259,13 +260,13 @@ class Level:
             square = self.grid[context.current[0], context.current[1]]
 
             if not square.is_straight():
-                square.height = context.current_height
+                square.depth = context.current_height
             elif flat_lengths[0] > 0:
                 flat_lengths[0] -= 1
-                square.height = context.current_height
+                square.depth = context.current_height
             else:
                 if context.going_up:
-                    square.height = context.current_height
+                    square.depth = context.current_height
                     context.current_height += 1
 
                     if context.current[0] < context.next[0]:
@@ -283,7 +284,7 @@ class Level:
                         flat_lengths[:-1] = flat_lengths[1:]
                 else:
                     context.current_height -= 1
-                    square.height = context.current_height
+                    square.depth = context.current_height
 
                     if context.current[0] < context.next[0]:
                         square.gradient = DESCENDING_EAST
@@ -317,12 +318,12 @@ class Level:
                 if self.grid[i, j + 1].east:
                     self.grid[i, j].north = True
                     self.grid[i, j].east = True
-                    self.grid[i, j].height = 0
+                    self.grid[i, j].depth = 0
                     self.grid[i, j].type = TRACK
 
                     self.grid[i + 1, j].north = True
                     self.grid[i + 1, j].west = True
-                    self.grid[i + 1, j].height = 0
+                    self.grid[i + 1, j].depth = 0
                     self.grid[i + 1, j].type = TRACK
 
                     self.grid[i, j + 1].east = False
@@ -337,8 +338,8 @@ class Level:
                     self.grid[i, j].east = True
                     self.grid[i, j + 1].south = True
                     self.grid[i, j + 1].east = True
-                    self.grid[i, j].height = 0
-                    self.grid[i, j + 1].height = 0
+                    self.grid[i, j].depth = 0
+                    self.grid[i, j + 1].depth = 0
 
                     self.grid[i + 1, j].north = False
                     self.grid[i + 1, j].west = True
@@ -358,8 +359,8 @@ class Level:
                     self.grid[i, j + 1].south = True
                     self.grid[i + 1, j + 1].west = True
                     self.grid[i + 1, j + 1].south = True
-                    self.grid[i, j + 1].height = 0
-                    self.grid[i + 1, j + 1].height = 0
+                    self.grid[i, j + 1].depth = 0
+                    self.grid[i + 1, j + 1].depth = 0
                     self.grid[i, j + 1].type = TRACK
                     self.grid[i + 1, j + 1].type = TRACK
                     return True
@@ -370,8 +371,8 @@ class Level:
                     self.grid[i, j].east = True
                     self.grid[i, j + 1].south = False
                     self.grid[i, j + 1].east = True
-                    self.grid[i + 1, j].height = 0
-                    self.grid[i + 1, j + 1].height = 0
+                    self.grid[i + 1, j].depth = 0
+                    self.grid[i + 1, j + 1].depth = 0
 
                     self.grid[i + 1, j].north = True
                     self.grid[i + 1, j].west = True
@@ -386,7 +387,7 @@ class Level:
     def extend_path_until_full(self):
         def extend_path_iterated():
             for i in range(width - 1):
-                for j in range(height - 1):
+                for j in range(depth - 1):
                     if self.try_extend_path_at(i, j):
                         return True
 
@@ -401,7 +402,7 @@ class Level:
     def get_upper_layer(self):
         upper_level = Level()
         for i in range(width):
-            for j in range(height):
+            for j in range(depth):
                 if self.grid[i, j].height == 3:
                     upper_level.grid[i, j] = self.grid[i, j].copy()
                     upper_level.grid[i, j].height = 0
@@ -412,7 +413,7 @@ class Level:
 
     def remove_upper_layer(self):
         for i in range(width):
-            for j in range(height):
+            for j in range(depth):
                 if self.grid[i, j].height == 3:
                     self.grid[i, j].east = False
                     self.grid[i, j].north = False
@@ -424,7 +425,7 @@ class Level:
     def get_all_paths(self):
         paths = []
         for i in range(width):
-            for j in range(height):
+            for j in range(depth):
                 if self.grid[i, j].type != TRACK:
                     continue
 
@@ -443,7 +444,7 @@ class Level:
 
     def render_minecraft(self, delta_y):
         for i in range(width):
-            for j in range(height):
+            for j in range(depth):
                 p = self.grid[i, j]
 
                 if not p.type == TRACK:
@@ -461,14 +462,14 @@ class Level:
     def render_matplotlib(self, include_heights=False, include_blocked=False):
         ax = plt.gca()
         plt.xlim(0, width)
-        plt.ylim(0, height)
+        plt.ylim(0, depth)
         ax.set_xticks(np.arange(0, width, 1))
-        ax.set_yticks(np.arange(0, height, 1))
+        ax.set_yticks(np.arange(0, depth, 1))
         ax.set_aspect("equal")
         plt.grid()
 
         for i in range(0, width):
-            for j in range(0, height):
+            for j in range(0, depth):
                 p = self.grid[i, j]
 
                 if include_heights:
@@ -507,7 +508,7 @@ class Level:
 
 class Path:
     def __init__(self, level, start_i, start_j):
-        self.mask = np.zeros((width, height), bool)
+        self.mask = np.zeros((width, depth), bool)
         self.path = []
         self.level = level
         self.start_i = start_i
@@ -621,14 +622,14 @@ class Path:
     def render_matplotlib(self):
         ax = plt.gca()
         plt.xlim(0, width)
-        plt.ylim(0, height)
+        plt.ylim(0, depth)
         ax.set_xticks(np.arange(0, width, 1))
-        ax.set_yticks(np.arange(0, height, 1))
+        ax.set_yticks(np.arange(0, depth, 1))
         ax.set_aspect("equal")
         plt.grid()
 
         for i in range(0, width):
-            for j in range(0, height):
+            for j in range(0, depth):
                 if self.mask[i, j]:
                     rect = Rectangle((i, j), 1, 1, facecolor='#9999ff')
                     ax.add_patch(rect)
@@ -670,7 +671,7 @@ class RollerCoaster:
 
     def clean_up_area(self):
         for i in range(width):
-            for j in range(height):
+            for j in range(depth):
                 for h in range(layers * 3):
                     block = Block("minecraft", "air")
                     minecraft_level.set_version_block(x + i, y + h, z + j, "minecraft:overworld", game_version, block)
