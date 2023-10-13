@@ -260,13 +260,13 @@ class Level:
             square = self.grid[context.current[0], context.current[1]]
 
             if not square.is_straight():
-                square.depth = context.current_height
+                square.height = context.current_height
             elif flat_lengths[0] > 0:
                 flat_lengths[0] -= 1
-                square.depth = context.current_height
+                square.height = context.current_height
             else:
                 if context.going_up:
-                    square.depth = context.current_height
+                    square.height = context.current_height
                     context.current_height += 1
 
                     if context.current[0] < context.next[0]:
@@ -284,7 +284,7 @@ class Level:
                         flat_lengths[:-1] = flat_lengths[1:]
                 else:
                     context.current_height -= 1
-                    square.depth = context.current_height
+                    square.height = context.current_height
 
                     if context.current[0] < context.next[0]:
                         square.gradient = DESCENDING_EAST
